@@ -60,6 +60,8 @@ public class Endless {
 
     private final Pattern duelPattern = Pattern.compile("WINNER!");
     private final Pattern endPattern = Pattern.compile("1st Killer");
+    private final Pattern sumoEndPattern = Pattern.compile("Winner -");
+    private final Pattern sumoDeathPattern = Pattern.compile("You have gained");
     private final Pattern tntEndPattern = Pattern.compile("1st Place:");
     private final Pattern dropperEndPattern = Pattern.compile("#1");
     private final Pattern copsEndPattern = Pattern.compile("Best Cop:");
@@ -154,6 +156,8 @@ public class Endless {
         Matcher matcherDropperEnd = dropperEndPattern.matcher(message);
         Matcher matcherDropperFinished = dropperFinishedPattern.matcher(message);
         Matcher matcherCopsEnd = copsEndPattern.matcher(message);
+        Matcher matcherSumoEnd = sumoEndPattern.matcher(message);
+        Matcher matcherSumoDeath = sumoDeathPattern.matcher(message);
 
         if (matcherDuel.find() && autoggEnabled && quickPlayAgain) {
             MC.thePlayer.sendChatMessage(autogg);
@@ -176,6 +180,9 @@ public class Endless {
             MC.thePlayer.sendChatMessage("/play tnt_tntrun");
         } else if(matcherDropperFinished.find() && quickPlayAgain){
             MC.thePlayer.sendChatMessage("/play arcade_dropper");
+        } else if(matcherSumoDeath.find() && quickPlayAgain){
+            KeyBinding.onTick(MC.gameSettings.keyBindsHotbar[7].getKeyCode());
+            KeyBinding.onTick(MC.gameSettings.keyBindUseItem.getKeyCode());
         }
 
         if (matcherEnd.find() && autoggEnabled) {
@@ -183,6 +190,8 @@ public class Endless {
         } else if(matcherTntEnd.find() && autoggEnabled){
             MC.thePlayer.sendChatMessage(autogg);
         } else if(matcherDropperEnd.find() && autoggEnabled){
+            MC.thePlayer.sendChatMessage(autogg);
+        } else if(matcherSumoEnd.find() && autoggEnabled){
             MC.thePlayer.sendChatMessage(autogg);
         }
 
