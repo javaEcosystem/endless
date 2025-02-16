@@ -2,7 +2,7 @@
  * Endless.java -
  *
  * Author: Johan Lebek
- * Created at: Sun Feb 16 10:47:00 CET 2025
+ * Created at: Sun Feb 16 17:00:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -58,7 +58,8 @@ public class Endless {
     private final KeyBinding togglePlayAgain = new KeyBinding("Toggle Auto-rq", Keyboard.KEY_INSERT, "Endless");
     private final KeyBinding toggleAutoGG = new KeyBinding("Toggle Auto-gg", Keyboard.KEY_RCONTROL, "Endless");
 
-    private final Pattern duelPattern = Pattern.compile("WINNER!");
+    private final Pattern duelPatternOne = Pattern.compile("WINNER!");
+    private final Pattern duelPatternTwo = Pattern.compile("Duels Tokens");
     private final Pattern endPattern = Pattern.compile("1st Killer");
     private final Pattern sumoEndPattern = Pattern.compile("Winner -");
     private final Pattern sumoDeathPattern = Pattern.compile("You have gained");
@@ -146,7 +147,8 @@ public class Endless {
         Matcher matcherThree = killPatternThree.matcher(message);
         Matcher matcherFour = killPatternFour.matcher(message);
         Matcher matcherFive = killPatternFive.matcher(message);
-        Matcher matcherDuel = duelPattern.matcher(message);
+        Matcher matcherDuelOne = duelPatternOne.matcher(message);
+        Matcher matcherDuelTwo = duelPatternTwo.matcher(message);
         Matcher matcherSwDeath = swDeathPattern.matcher(message);
         Matcher matcherBwDeath = bwDeathPattern.matcher(message);
         Matcher matcherTntDeath = tntDeathPattern.matcher(message);
@@ -159,13 +161,10 @@ public class Endless {
         Matcher matcherSumoEnd = sumoEndPattern.matcher(message);
         Matcher matcherSumoDeath = sumoDeathPattern.matcher(message);
 
-        if (matcherDuel.find() && autoggEnabled && quickPlayAgain) {
+        if (matcherDuelOne.find() && autoggEnabled) {
             MC.thePlayer.sendChatMessage(autogg);
-            KeyBinding.onTick(MC.gameSettings.keyBindsHotbar[4].getKeyCode());
-            KeyBinding.onTick(MC.gameSettings.keyBindUseItem.getKeyCode());
-        } else if(matcherDuel.find() && autoggEnabled){
-            MC.thePlayer.sendChatMessage(autogg);
-        } else if(matcherDuel.find() && quickPlayAgain){
+        }
+        if (matcherDuelTwo.find() && quickPlayAgain) {
             KeyBinding.onTick(MC.gameSettings.keyBindsHotbar[4].getKeyCode());
             KeyBinding.onTick(MC.gameSettings.keyBindUseItem.getKeyCode());
         }
