@@ -61,10 +61,10 @@ public class Endless {
     private final Pattern duelPatternOne = Pattern.compile("WINNER!");
     private final Pattern duelPatternTwo = Pattern.compile("Duels Tokens");
     private final Pattern endPattern = Pattern.compile("1st Killer");
-    private final Pattern sumoEndPattern = Pattern.compile("Winner -");
+    private final Pattern sumoEndPattern = Pattern.compile("1st -");
     private final Pattern sumoDeathPattern = Pattern.compile("You have gained");
     private final Pattern tntEndPattern = Pattern.compile("1st Place:");
-    private final Pattern dropperEndPattern = Pattern.compile("#1");
+    private final Pattern dropperEndPattern = Pattern.compile("You didn't finish!");
     private final Pattern copsEndPattern = Pattern.compile("Best Cop:");
     private final Pattern dropperFinishedPattern = Pattern.compile("You finished Map 5");
     private final Pattern swDeathPattern = Pattern.compile("You died! Want to play again");
