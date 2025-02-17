@@ -2,7 +2,7 @@
  * ModMenu.java -
  *
  * Author: Johan Lebek
- * Created at: Sun Feb 16 10:47:00 CET 2025
+ * Created at: Mon Feb 17 15:43:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -73,7 +73,7 @@ public class ModMenu extends GuiScreen {
     }
 
     private void cycleSelectedElement() {
-        List<String> elements = Arrays.asList("FPS", "Strength", "Armor HL", "Weapon HL", "Inventory", "Armor", "Potions");
+        List<String> elements = Arrays.asList("FPS", "Strength", "Armor HL", "Weapon HL", "Inventory", "Armor", "Items Flow", "Potions");
         int nextIndex = (elements.indexOf(selectedElement) + 1) % elements.size();
         selectedElement = elements.get(nextIndex);
 
@@ -93,6 +93,10 @@ public class ModMenu extends GuiScreen {
             isColorable = false;
             selectedX = Endless.armX;
             selectedY = Endless.armY;
+        } else if (selectedElement.equals("Items Flow")) {
+            isColorable = true;
+            selectedX = Endless.flowX;
+            selectedY = Endless.flowY;
         } else if (selectedElement.equals("Potions")) {
             isColorable = true;
             selectedX = Endless.potX;
@@ -118,6 +122,8 @@ public class ModMenu extends GuiScreen {
             Endless.fpsColor = color;
         } else if(selectedElement.equals("Strength")){
             Endless.strColor = color;
+        } else if(selectedElement.equals("Items Flow")){
+            Endless.flowColor = color;
         } else if(selectedElement.equals("Potions")){
             Endless.potColor = color;
         } else if(selectedElement.equals("Armor HL")){
@@ -140,6 +146,9 @@ public class ModMenu extends GuiScreen {
         } else if (selectedElement.equals("Armor")) {
             Endless.armX = selectedX;
             Endless.armY = selectedY;
+        } else if (selectedElement.equals("Items Flow")) {
+            Endless.flowX = selectedX;
+            Endless.flowY = selectedY;
         } else if (selectedElement.equals("Potions")) {
             Endless.potX = selectedX;
             Endless.potY = selectedY;
@@ -173,11 +182,12 @@ public class ModMenu extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
+
         if (selectedElement.equals("FPS")) {
             rectX = 200;
             rectY = 113;
             drawRect(0, 0, rectX, rectY, 0x40A0A0A0);
-        } else if (selectedElement.equals("Strength")) {
+        } else if (selectedElement.equals("Strength") || selectedElement.equals("Items Flow")) {
             rectX = 250;
             rectY = 125;
             drawRect(0, 0, rectX, rectY, 0x40A0A0A0);
@@ -194,11 +204,10 @@ public class ModMenu extends GuiScreen {
             rectY = 111;
             drawRect(0, 0, rectX, rectY, 0x40A0A0A0);
         }
-        draggableRect.draw(mc);
 
+        draggableRect.draw();
         super.drawScreen(mouseX, mouseY, partialTicks);
-
-        drawCenteredString(fontRendererObj, "[Screen Pos]", 40, 115, 0xFFFFFF);
+        drawCenteredString(fontRendererObj, "[Screen Pos]", 35, 5, 0xFFFFFF);
         if (showColorText) {
             drawCenteredString(fontRendererObj, "[Color]", width / 2, 115, 0xFFFFFF);
         }
@@ -240,7 +249,10 @@ public class ModMenu extends GuiScreen {
     }
 
     private class DraggableRectangle {
-        private int x, y, width, height;
+        private int x;
+        private int y;
+        private final int width;
+        private final int height;
         private boolean dragging = false;
         private int offsetX, offsetY;
 
@@ -251,7 +263,7 @@ public class ModMenu extends GuiScreen {
             this.height = height;
         }
 
-        public void draw(Minecraft mc) {
+        public void draw() {
             drawRect(x, y, x + width, y + height, 0xFFFFFFFF);
         }
 

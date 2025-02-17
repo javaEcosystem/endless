@@ -8,6 +8,7 @@ Endless - A mod designed to enhance your 1.8.9 pvp experience :)
     - Shows all your inventory items so that you don't need to always manually open it
     - Highlights the best weapon present in your inventory
     - Highlights the best tiered armor present in your inventory for each piece
+- Inventory Item Flow (items added and removed) Display
 - [Hypixel Skywars] Current players with active Strength Buff Display
 - [Hypixel && Bedwars Practice Club] Customizable Auto-gg with { /setautogg (name) } in-game command (currently working for Bedwars, Skywars, Duels, Tnt Run, Tnt Tag, Dropper, Cops and Crims, Block Sumo)
 - [Hypixel && Bedwars Practice Club] Instantly re-queue (Auto-rq) game if you die (currently working for Bedwars, Skywars, Tnt Run, Tnt Tag, Block Sumo) or you finish the game (Dropper), or the game ends (Duels, Cops and Crims)

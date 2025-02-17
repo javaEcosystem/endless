@@ -2,7 +2,7 @@
  * Endless.java -
  *
  * Author: Johan Lebek
- * Created at: Sun Feb 16 17:00:00 CET 2025
+ * Created at: Mon Feb 17 15:56:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -15,14 +15,9 @@ package com.johan.endless;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -38,18 +33,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static net.minecraft.client.gui.Gui.drawRect;
-
 @Mod(modid = Endless.MODID, version = Endless.VERSION)
 public class Endless {
 
-    private final Minecraft MC = Minecraft.getMinecraft();
+    public static final Minecraft MC = Minecraft.getMinecraft();
     public static final String MODID = "endless";
     public static final String VERSION = "1.3";
 
     public static String autogg = "gg";
-    private final int gridColor = 0xFFFFFFFF;
-    private final Map<String, Integer> activeKillers = new HashMap<String, Integer>();
+    public static final int gridColor = 0xFFFFFFFF;
+    public static final Map<String, Integer> activeKillers = new HashMap<String, Integer>();
 
     private final KeyBinding toggleInventoryKey = new KeyBinding("Toggle Inventory", Keyboard.KEY_RIGHT, "Endless");
     private final KeyBinding toggleArmorKey = new KeyBinding("Toggle Armor", Keyboard.KEY_LEFT, "Endless");
@@ -57,6 +50,7 @@ public class Endless {
     private final KeyBinding toggleStrengthKey = new KeyBinding("[sw] Toggle Active Buffed Players", Keyboard.KEY_DOWN, "Endless");
     private final KeyBinding togglePlayAgain = new KeyBinding("Toggle Auto-rq", Keyboard.KEY_INSERT, "Endless");
     private final KeyBinding toggleAutoGG = new KeyBinding("Toggle Auto-gg", Keyboard.KEY_RCONTROL, "Endless");
+    private final KeyBinding toggleItemFlow = new KeyBinding("Toggle Item Flow", Keyboard.KEY_END, "Endless");
 
     private final Pattern duelPatternOne = Pattern.compile("WINNER!");
     private final Pattern duelPatternTwo = Pattern.compile("Duels Tokens");
@@ -88,9 +82,12 @@ public class Endless {
     public static int potY = 320;
     public static int strX = 5;
     public static int strY = 220;
+    public static int flowX = 700;
+    public static int flowY = 220;
 
     public static int fpsColor = 0x00FF00;
     public static int strColor = 0x00FF00;
+    public static int flowColor = 0xFFFFFF;
     public static int potColor = 0x00FF00;
     public static int highlightArmorColor = 0x80FF0000;
     public static int highlightWeaponColor = 0x800000FF;
@@ -100,6 +97,7 @@ public class Endless {
     private boolean quickPlayAgain = true;
     private boolean showArmor = true;
     private boolean showStrength = true;
+    private boolean showItemFlow = true;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -110,6 +108,7 @@ public class Endless {
         ClientRegistry.registerKeyBinding(toggleStrengthKey);
         ClientRegistry.registerKeyBinding(togglePlayAgain);
         ClientRegistry.registerKeyBinding(toggleAutoGG);
+        ClientRegistry.registerKeyBinding(toggleItemFlow);
         ClientCommandHandler.instance.registerCommand(new ModCommands());
     }
 
@@ -129,6 +128,9 @@ public class Endless {
         }
         if (toggleAutoGG.isPressed()) {
             autoggEnabled = !autoggEnabled;
+        }
+        if (toggleItemFlow.isPressed()) {
+            showItemFlow = !showItemFlow;
         }
         if (toggleMenuKey.isPressed()) {
             if (Minecraft.getMinecraft().currentScreen == null) {
@@ -242,9 +244,6 @@ public class Endless {
         try {
             if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
 
-            FontRenderer fontRenderer = MC.fontRendererObj;
-            RenderItem renderItem = MC.getRenderItem();
-
             ItemStack pot = null;
             int count = 0;
             for (int i = 9; i < 45; i++) {
@@ -255,247 +254,23 @@ public class Endless {
                 }
             }
 
+            FontRenderer fontRenderer = MC.fontRendererObj;
+            RenderItem renderItem = MC.getRenderItem();
+
             int fps = Minecraft.getDebugFPS();
             fontRenderer.drawString("[FPS] " + fps, fpsX, fpsY, fpsColor);
 
-            if (showStrength){ displayStrength(fontRenderer); }
-            if (showInventory){ displayInventory(renderItem); }
-            if (showArmor){ displayArmor(renderItem); }
+            if (showStrength){ ModHUD.displayStrength(fontRenderer); }
+            if (showInventory){ ModHUD.displayInventory(renderItem); }
+            if (showArmor){ ModHUD.displayArmor(renderItem); }
+            if (showItemFlow){
+                ItemFlow.updateInventory();
+                ItemFlow.renderItemChanges(fontRenderer);
+            }
 
-            displayPot(count, pot, renderItem, fontRenderer);
+            ModHUD.displayPot(count, pot, renderItem, fontRenderer);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void displayStrength(FontRenderer f){
-        int xOffest = strX;
-        int yOffset = strY;
-        GlStateManager.enableDepth();
-        GlStateManager.pushMatrix();
-        GlStateManager.scale(0.75f, 0.75f, 1.0f);
-        f.drawString("[Active Strength]", xOffest, yOffset, strColor);
-        for (Map.Entry<String, Integer> entry : activeKillers.entrySet()) {
-            if(!entry.getKey().equals("it") && !entry.getKey().equals("mc")){
-                String displayText = entry.getKey() + " - " + (entry.getValue() / 20) + "s";
-                f.drawString(displayText, xOffest, yOffset+10, 0xFFFFFF);
-                yOffset += 10;
-            }
-        }
-        GlStateManager.popMatrix();
-        GlStateManager.disableDepth();
-    }
-
-    private void displayInventory(RenderItem r) {
-        RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.enableDepth();
-        GlStateManager.pushMatrix();
-        GlStateManager.scale(0.75f, 0.75f, 1.0f);
-
-        int slotSize = 10;
-        int columns = 9;
-        int rows = 4;
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < columns; col++) {
-                int x = (invX + col * slotSize) * 2;
-                int y = (invY + row * slotSize) * 2;
-
-                drawRect(x, y, x + slotSize * 2, y + 1, gridColor);
-                drawRect(x, y, x + 1, y + slotSize * 2, gridColor);
-                drawRect(x + slotSize * 2 - 1, y, x + slotSize * 2, y + slotSize * 2, gridColor);
-                drawRect(x, y + slotSize * 2 - 1, x + slotSize * 2, y + slotSize * 2, gridColor);
-            }
-        }
-        for (int i = 9; i < 45; i++) {
-            ItemStack stack = MC.thePlayer.inventoryContainer.getInventory().get(i);
-            if (stack != null) {
-
-                if(stack.getDisplayName().contains("Skip")){
-                    KeyBinding.onTick(MC.gameSettings.keyBindsHotbar[0].getKeyCode());
-                    KeyBinding.onTick(MC.gameSettings.keyBindUseItem.getKeyCode());
-                }
-
-                int row = (i - 9) / columns;
-                int col = (i - 9) % columns;
-                int invStartX = invX;
-                int invStartY = invY;
-                int x = ((invStartX + col * slotSize) * 2)+2;
-                int y = ((invStartY + row * slotSize) * 2)+2;
-                boolean shouldHighlightArmor = false;
-                boolean shouldHighlightWeapon = false;
-
-                if (stack.getItem() instanceof ItemArmor) {
-                    ItemArmor armor = (ItemArmor) stack.getItem();
-                    ItemStack helmet = MC.thePlayer.inventoryContainer.getInventory().get(5);
-                    ItemStack chestplate = MC.thePlayer.inventoryContainer.getInventory().get(6);
-                    ItemStack leggings = MC.thePlayer.inventoryContainer.getInventory().get(7);
-                    ItemStack boots = MC.thePlayer.inventoryContainer.getInventory().get(8);
-
-                    shouldHighlightArmor =
-                                    (helmet == null && armor.armorType == 0) ||
-                                    (helmet != null && armor.armorType == 0 && (
-                                                    (helmet.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Gold")) ||
-                                                    (helmet.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Chain")) ||
-                                                    (helmet.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Chain")) ||
-                                                    (helmet.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Iron")) ||
-                                                    (helmet.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Iron")) ||
-                                                    (helmet.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Iron")) ||
-                                                    (helmet.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (helmet.getDisplayName().contains("Iron") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (helmet.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (helmet.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Diamond"))
-                                    )) ||
-
-                                    (chestplate == null && armor.armorType == 1) ||
-                                    (chestplate != null && armor.armorType == 1 && (
-                                                    (chestplate.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Gold")) ||
-                                                    (chestplate.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Chain")) ||
-                                                    (chestplate.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Chain")) ||
-                                                    (chestplate.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Iron")) ||
-                                                    (chestplate.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Iron")) ||
-                                                    (chestplate.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Iron")) ||
-                                                    (chestplate.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (chestplate.getDisplayName().contains("Iron") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (chestplate.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (chestplate.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Diamond"))
-                                    )) ||
-
-                                    (leggings == null && armor.armorType == 2) ||
-                                    (leggings != null && armor.armorType == 2 && (
-                                                    (leggings.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Gold")) ||
-                                                    (leggings.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Chain")) ||
-                                                    (leggings.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Chain")) ||
-                                                    (leggings.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Iron")) ||
-                                                    (leggings.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Iron")) ||
-                                                    (leggings.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Iron")) ||
-                                                    (leggings.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (leggings.getDisplayName().contains("Iron") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (leggings.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (leggings.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Diamond"))
-                                    )) ||
-
-                                    (boots == null && armor.armorType == 3) ||
-                                    (boots != null && armor.armorType == 3 && (
-                                                    (boots.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Gold")) ||
-                                                    (boots.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Chain")) ||
-                                                    (boots.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Chain")) ||
-                                                    (boots.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Iron")) ||
-                                                    (boots.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Iron")) ||
-                                                    (boots.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Iron")) ||
-                                                    (boots.getDisplayName().contains("Chain") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (boots.getDisplayName().contains("Iron") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (boots.getDisplayName().contains("Gold") && stack.getDisplayName().contains("Diamond")) ||
-                                                    (boots.getDisplayName().contains("Leather") && stack.getDisplayName().contains("Diamond"))
-                                    ));
-                }
-                ItemStack bestWeapon = null;
-                for(int j=9; j<45; j++){
-                    ItemStack w = MC.thePlayer.inventoryContainer.getInventory().get(j);
-                    if (w != null && (w.getItem() instanceof ItemSword || w.getItem() instanceof ItemAxe)) {
-                        if (bestWeapon == null || compareWeaponRarity(w, bestWeapon) > 0) {
-                            bestWeapon = w;
-                        }
-                    }
-                }
-                if (bestWeapon == stack) {
-                    shouldHighlightWeapon = true;
-                }
-                if (shouldHighlightArmor) { drawRect(x-1, y-1, (x + slotSize * 2)-3, (y + slotSize * 2)-3, highlightArmorColor); }
-                if (shouldHighlightWeapon) {drawRect(x-1, y-1, (x + slotSize * 2)-3, (y + slotSize * 2)-3, highlightWeaponColor); }
-                r.renderItemIntoGUI(stack, x, y);
-            }
-        }
-        GlStateManager.popMatrix();
-        GlStateManager.disableDepth();
-        RenderHelper.disableStandardItemLighting();
-    }
-
-    private void displayArmor(RenderItem r){
-        RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.enableDepth();
-        GlStateManager.pushMatrix();
-        GlStateManager.scale(0.75f, 0.75f, 1.0f);
-
-        int slotSize = 10;
-        int rows = 4;
-        for (int row = 0; row < rows; row++) {
-            int x = armX;
-            int y = (armY + row * slotSize)*2;
-
-            drawRect(x, y, x + slotSize * 2, y + 1, gridColor);
-            drawRect(x, y, x + 1, y + slotSize * 2, gridColor);
-            drawRect(x + slotSize * 2 - 1, y, x + slotSize * 2, y + slotSize * 2, gridColor);
-            drawRect(x, y + slotSize * 2 - 1, x + slotSize * 2, y + slotSize * 2, gridColor);
-        }
-
-        for (int i = 5; i < 9; i++) {
-            ItemStack stack = MC.thePlayer.inventoryContainer.getInventory().get(i);
-            if (stack != null) {
-                int armStartX = armX;
-                int armStartY = armY;
-                r.renderItemIntoGUI(stack, armStartX+2, ((armStartY+ slotSize)*2) + (i-6)*20 + 2);
-                int maxDurability = stack.getMaxDamage();
-                if (maxDurability > 0) {
-
-                    int damage = stack.getItemDamage();
-                    int durabilityLeft = maxDurability - damage;
-                    int durabilityPercentage = (int) ((durabilityLeft / (float) maxDurability) * 100);
-                    int x = armStartX + 23;
-                    int y = ((armStartY + slotSize) * 2) + (i - 6) * 20 + 6;
-
-                    if(durabilityPercentage>50){
-                        MC.fontRendererObj.drawString(durabilityPercentage + "%", x, y, 0x00FF00);
-                    } else if(durabilityPercentage>20){
-                        MC.fontRendererObj.drawString(durabilityPercentage + "%", x, y, 0xFFA500);
-                    } else {
-                        MC.fontRendererObj.drawString(durabilityPercentage + "%", x, y, 0xFF0000);
-                    }
-                }
-            }
-        }
-        GlStateManager.popMatrix();
-        GlStateManager.disableDepth();
-        RenderHelper.disableStandardItemLighting();
-    }
-
-    private void displayPot(int counter, ItemStack p, RenderItem r, FontRenderer f){
-        if (p == null){return;}
-        if (p.getDisplayName().contains("Splash") && p.getDisplayName().contains("Heal")){
-            f.drawString(String.valueOf(counter), potX+15, potY+5, potColor);
-        }
-
-        RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.enableDepth();
-        GlStateManager.pushMatrix();
-        r.renderItemIntoGUI(p, potX, potY);
-        GlStateManager.popMatrix();
-        GlStateManager.disableDepth();
-        RenderHelper.disableStandardItemLighting();
-    }
-
-    private int compareWeaponRarity(ItemStack a, ItemStack b) {
-        double damageA = getWeaponDamage(a);
-        double damageB = getWeaponDamage(b);
-        return Double.compare(damageA, damageB);
-    }
-
-    private double getWeaponDamage(ItemStack stack) {
-        if (stack == null || stack.getItem() == null) return 0.0;
-        List<String> tooltip = stack.getTooltip(MC.thePlayer, MC.gameSettings.advancedItemTooltips);
-        String pattern = "(\\+\\d+(?:\\.\\d+)?) Attack Damage";
-
-        for (String line : tooltip) {
-            if (line.matches(".*" + pattern + ".*")) {
-                Pattern p = Pattern.compile(pattern);
-                Matcher m = p.matcher(line);
-                if (m.find()) {
-                    try {
-                        return Double.parseDouble(m.group(1));
-                    } catch (NumberFormatException ignored) {
-                    }
-                }
-            }
-        }
-        return 0.0;
     }
 }
