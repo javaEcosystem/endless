@@ -2,7 +2,7 @@
  * ItemFlow.java -
  *
  * Author: Johan Lebek
- * Created at: Mon Feb 17 15:35:00 CET 2025
+ * Created at: Mon Feb 17 18:02:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -18,13 +18,16 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ItemFlow {
 
     private static final Map<String, Integer> previousInventory = new HashMap<String, Integer>();
     private static final List<ItemChange> addedItems = new ArrayList<ItemChange>();
     private static final List<ItemChange> removedItems = new ArrayList<ItemChange>();
-    private static final int DISPLAY_DURATION = 20;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public static void updateInventory() {
         Map<String, Integer> tempInventory = new HashMap<String, Integer>();
@@ -72,25 +75,6 @@ public class ItemFlow {
         } else {
             removedItems.add(itemChange);
         }
-        cleanUpOldItems();
-    }
-
-    private static void cleanUpOldItems() {
-        Iterator<ItemChange> iterator = addedItems.iterator();
-        while (iterator.hasNext()) {
-            ItemChange item = iterator.next();
-            if (getCurrentTick() - item.tick > DISPLAY_DURATION) {
-                iterator.remove();
-            }
-        }
-
-        iterator = removedItems.iterator();
-        while (iterator.hasNext()) {
-            ItemChange item = iterator.next();
-            if (getCurrentTick() - item.tick > DISPLAY_DURATION) {
-                iterator.remove();
-            }
-        }
     }
 
     private static int getCurrentTick() {
@@ -115,18 +99,29 @@ public class ItemFlow {
         GlStateManager.scale(0.75f, 0.75f, 1.0f);
         int xOffest = Endless.flowX;
         int yOffset = Endless.flowY;
-        fontRenderer.drawString("[Items Flow]", xOffest, yOffset, Endless.flowColor);
+        fontRenderer.drawString("[Item Flow]", xOffest, yOffset, Endless.flowColor);
 
-        for (ItemChange change : addedItems) {
+        for (final ItemChange change : addedItems) {
             fontRenderer.drawString(change.message, xOffest, yOffset + 10, change.color);
             yOffset += 10;
+            scheduler.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    addedItems.remove(change);
+                }
+            }, 2, TimeUnit.SECONDS);
         }
 
-        for (ItemChange change : removedItems) {
+        for (final ItemChange change : removedItems) {
             fontRenderer.drawString(change.message, xOffest, yOffset + 10, change.color);
             yOffset += 10;
+            scheduler.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    removedItems.remove(change);
+                }
+            }, 2, TimeUnit.SECONDS);
         }
-
         GlStateManager.popMatrix();
         GlStateManager.disableDepth();
     }

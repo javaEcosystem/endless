@@ -2,7 +2,7 @@
  * Endless.java -
  *
  * Author: Johan Lebek
- * Created at: Mon Feb 17 15:56:00 CET 2025
+ * Created at: Mon Feb 17 17:58:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -77,13 +77,13 @@ public class Endless {
     public static int invX = 5;
     public static int invY = 5;
     public static int armX = 10;
-    public static int armY = 60;
+    public static int armY = 50;
     public static int potX = 415;
     public static int potY = 320;
-    public static int strX = 5;
-    public static int strY = 220;
-    public static int flowX = 700;
-    public static int flowY = 220;
+    public static int strX = 85;
+    public static int strY = 100;
+    public static int flowX = 10;
+    public static int flowY = 200;
 
     public static int fpsColor = 0x00FF00;
     public static int strColor = 0x00FF00;

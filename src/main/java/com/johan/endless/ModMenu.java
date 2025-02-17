@@ -2,7 +2,7 @@
  * ModMenu.java -
  *
  * Author: Johan Lebek
- * Created at: Mon Feb 17 15:43:00 CET 2025
+ * Created at: Mon Feb 17 18:04:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -73,7 +73,7 @@ public class ModMenu extends GuiScreen {
     }
 
     private void cycleSelectedElement() {
-        List<String> elements = Arrays.asList("FPS", "Strength", "Armor HL", "Weapon HL", "Inventory", "Armor", "Items Flow", "Potions");
+        List<String> elements = Arrays.asList("FPS", "Strength", "Armor HL", "Weapon HL", "Inventory", "Armor", "Item Flow", "Potions");
         int nextIndex = (elements.indexOf(selectedElement) + 1) % elements.size();
         selectedElement = elements.get(nextIndex);
 
@@ -93,7 +93,7 @@ public class ModMenu extends GuiScreen {
             isColorable = false;
             selectedX = Endless.armX;
             selectedY = Endless.armY;
-        } else if (selectedElement.equals("Items Flow")) {
+        } else if (selectedElement.equals("Item Flow")) {
             isColorable = true;
             selectedX = Endless.flowX;
             selectedY = Endless.flowY;
@@ -122,7 +122,7 @@ public class ModMenu extends GuiScreen {
             Endless.fpsColor = color;
         } else if(selectedElement.equals("Strength")){
             Endless.strColor = color;
-        } else if(selectedElement.equals("Items Flow")){
+        } else if(selectedElement.equals("Item Flow")){
             Endless.flowColor = color;
         } else if(selectedElement.equals("Potions")){
             Endless.potColor = color;
@@ -146,7 +146,7 @@ public class ModMenu extends GuiScreen {
         } else if (selectedElement.equals("Armor")) {
             Endless.armX = selectedX;
             Endless.armY = selectedY;
-        } else if (selectedElement.equals("Items Flow")) {
+        } else if (selectedElement.equals("Item Flow")) {
             Endless.flowX = selectedX;
             Endless.flowY = selectedY;
         } else if (selectedElement.equals("Potions")) {
@@ -187,7 +187,7 @@ public class ModMenu extends GuiScreen {
             rectX = 200;
             rectY = 113;
             drawRect(0, 0, rectX, rectY, 0x40A0A0A0);
-        } else if (selectedElement.equals("Strength") || selectedElement.equals("Items Flow")) {
+        } else if (selectedElement.equals("Strength") || selectedElement.equals("Item Flow")) {
             rectX = 250;
             rectY = 125;
             drawRect(0, 0, rectX, rectY, 0x40A0A0A0);
