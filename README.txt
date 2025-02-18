@@ -1,4 +1,4 @@
-Endless - A mod designed to enhance your 1.8.9 pvp experience :)
+Endless - A mod designed to enhance your 1.8.9 multiplayer experience :)
 
 
 📜 Features
