@@ -2,7 +2,7 @@
  * Endless.java -
  *
  * Author: Johan Lebek
- * Created at: Mon Feb 17 17:58:00 CET 2025
+ * Created at: Tue Feb 18 23:33:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -15,11 +15,15 @@ package com.johan.endless;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -40,10 +44,6 @@ public class Endless {
     public static final String MODID = "endless";
     public static final String VERSION = "1.3";
 
-    public static String autogg = "gg";
-    public static final int gridColor = 0xFFFFFFFF;
-    public static final Map<String, Integer> activeKillers = new HashMap<String, Integer>();
-
     private final KeyBinding toggleInventoryKey = new KeyBinding("Toggle Inventory", Keyboard.KEY_RIGHT, "Endless");
     private final KeyBinding toggleArmorKey = new KeyBinding("Toggle Armor", Keyboard.KEY_LEFT, "Endless");
     private final KeyBinding toggleMenuKey = new KeyBinding("Toggle Menu", Keyboard.KEY_UP, "Endless");
@@ -51,6 +51,7 @@ public class Endless {
     private final KeyBinding togglePlayAgain = new KeyBinding("Toggle Auto-rq", Keyboard.KEY_INSERT, "Endless");
     private final KeyBinding toggleAutoGG = new KeyBinding("Toggle Auto-gg", Keyboard.KEY_RCONTROL, "Endless");
     private final KeyBinding toggleItemFlow = new KeyBinding("Toggle Item Flow", Keyboard.KEY_END, "Endless");
+    private final KeyBinding toggleActivePet = new KeyBinding("Toggle Active Pet", Keyboard.KEY_F8, "Endless");
 
     private final Pattern duelPatternOne = Pattern.compile("WINNER!");
     private final Pattern duelPatternTwo = Pattern.compile("Duels Tokens");
@@ -72,12 +73,19 @@ public class Endless {
     private final Pattern killPatternFour = Pattern.compile("(\\w+) on (\\w+)'s (\\w+)\\.");
     private final Pattern killPatternFive = Pattern.compile("(\\w+) for (\\w+)\\.");
 
+    public static final Map<String, Integer> activeKillers = new HashMap<String, Integer>();
+    public static IInventory currentChestInventory;
+    public static String currentChestTitle;
+    public static String autogg = "gg";
+
     public static int fpsX = 300;
     public static int fpsY = 5;
-    public static int invX = 5;
+    public static int invX = 15;
     public static int invY = 5;
     public static int armX = 10;
-    public static int armY = 50;
+    public static int armY = 45;
+    public static int petX = 210;
+    public static int petY = 45;
     public static int potX = 415;
     public static int potY = 320;
     public static int strX = 85;
@@ -91,6 +99,7 @@ public class Endless {
     public static int potColor = 0x00FF00;
     public static int highlightArmorColor = 0x80FF0000;
     public static int highlightWeaponColor = 0x800000FF;
+    public static final int gridColor = 0xFFFFFFFF;
 
     private boolean autoggEnabled = true;
     private boolean showInventory = true;
@@ -98,6 +107,7 @@ public class Endless {
     private boolean showArmor = true;
     private boolean showStrength = true;
     private boolean showItemFlow = true;
+    private boolean showActivePet = true;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -109,6 +119,7 @@ public class Endless {
         ClientRegistry.registerKeyBinding(togglePlayAgain);
         ClientRegistry.registerKeyBinding(toggleAutoGG);
         ClientRegistry.registerKeyBinding(toggleItemFlow);
+        ClientRegistry.registerKeyBinding(toggleActivePet);
         ClientCommandHandler.instance.registerCommand(new ModCommands());
     }
 
@@ -131,6 +142,9 @@ public class Endless {
         }
         if (toggleItemFlow.isPressed()) {
             showItemFlow = !showItemFlow;
+        }
+        if (toggleActivePet.isPressed()) {
+            showActivePet = !showActivePet;
         }
         if (toggleMenuKey.isPressed()) {
             if (Minecraft.getMinecraft().currentScreen == null) {
@@ -240,6 +254,16 @@ public class Endless {
     }
 
     @SubscribeEvent
+    public void onGuiOpen(GuiScreenEvent.InitGuiEvent event) {
+        if (event.gui instanceof GuiChest) {
+            GuiChest chestGui = (GuiChest) event.gui;
+            IInventory chestInventory = ((ContainerChest) chestGui.inventorySlots).getLowerChestInventory();
+            currentChestTitle = chestInventory.getDisplayName().getUnformattedText();
+            currentChestInventory = chestInventory;
+        }
+    }
+
+    @SubscribeEvent
     public void onRenderGameOverlay(RenderGameOverlayEvent.Post event) {
         try {
             if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
@@ -263,6 +287,7 @@ public class Endless {
             if (showStrength){ ModHUD.displayStrength(fontRenderer); }
             if (showInventory){ ModHUD.displayInventory(renderItem); }
             if (showArmor){ ModHUD.displayArmor(renderItem); }
+            if (showActivePet){ ModHUD.displayActivePet(renderItem); }
             if (showItemFlow){
                 ItemFlow.updateInventory();
                 ItemFlow.renderItemChanges(fontRenderer);

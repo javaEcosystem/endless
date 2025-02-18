@@ -2,7 +2,7 @@
  * ModHUD.java -
  *
  * Author: Johan Lebek
- * Created at: Mon Feb 17 15:35:00 CET 2025
+ * Created at: Tue Feb 18 23:33:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -261,5 +261,58 @@ public class ModHUD {
             }
         }
         return 0.0;
+    }
+
+    public static void displayActivePet(RenderItem r)
+    {
+        GlStateManager.enableDepth();
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(0.75f, 0.75f, 1.0f);
+
+        int slotSize = 10;
+        int x = Endless.petX;
+        int y = Endless.petY * 2;
+
+        drawRect(x, y, x + slotSize * 2, y + 1, Endless.gridColor);
+        drawRect(x, y, x + 1, y + slotSize * 2, Endless.gridColor);
+        drawRect(x + slotSize * 2 - 1, y, x + slotSize * 2, y + slotSize * 2, Endless.gridColor);
+        drawRect(x, y + slotSize * 2 - 1, x + slotSize * 2, y + slotSize * 2, Endless.gridColor);
+
+        GlStateManager.popMatrix();
+        GlStateManager.disableDepth();
+
+        if (!"Pets".equals(Endless.currentChestTitle)) return;
+        int[][] slotRanges = {{10, 16}, {19, 25}, {28, 34}, {37, 43}};
+        for (int[] range : slotRanges) {
+            findAndRenderPet(r, range[0], range[1]);
+        }
+    }
+
+    private static void findAndRenderPet(RenderItem r, int startSlot, int endSlot) {
+        if (Endless.currentChestInventory == null) return;
+
+        for (int i = startSlot; i < endSlot; i++) {
+            ItemStack stack = Endless.currentChestInventory.getStackInSlot(i);
+            if (stack==null) continue;
+
+            List<String> tooltip = stack.getTooltip(Endless.MC.thePlayer, Endless.MC.gameSettings.advancedItemTooltips);
+            for (String line : tooltip) {
+                if (line.contains("Click to despawn!")) {
+                    try {
+                        int armStartX = Endless.petX;
+                        int armStartY = Endless.petY;
+                        RenderHelper.enableGUIStandardItemLighting();
+                        GlStateManager.enableDepth();
+                        GlStateManager.pushMatrix();
+                        GlStateManager.scale(0.75f, 0.75f, 1.0f);
+                        r.renderItemIntoGUI(stack, armStartX + 2, (((armStartY + 10) * 2) + (i - 6) * 20 + 2)-100);
+                        GlStateManager.popMatrix();
+                        GlStateManager.disableDepth();
+                        RenderHelper.disableStandardItemLighting();
+                    } catch (Exception ignored) {}
+                    return;
+                }
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@
  * ModMenu.java -
  *
  * Author: Johan Lebek
- * Created at: Mon Feb 17 18:04:00 CET 2025
+ * Created at: Tue Feb 18 23:33:00 CET 2025
  *
  * Copyright (C) 2025 Johan Lebek
  *
@@ -73,7 +73,7 @@ public class ModMenu extends GuiScreen {
     }
 
     private void cycleSelectedElement() {
-        List<String> elements = Arrays.asList("FPS", "Strength", "Armor HL", "Weapon HL", "Inventory", "Armor", "Item Flow", "Potions");
+        List<String> elements = Arrays.asList("FPS", "Strength", "Armor HL", "Weapon HL", "Inventory", "Armor", "Item Flow", "Active Pet", "Potions");
         int nextIndex = (elements.indexOf(selectedElement) + 1) % elements.size();
         selectedElement = elements.get(nextIndex);
 
@@ -97,6 +97,10 @@ public class ModMenu extends GuiScreen {
             isColorable = true;
             selectedX = Endless.flowX;
             selectedY = Endless.flowY;
+        } else if (selectedElement.equals("Active Pet")) {
+            isColorable = false;
+            selectedX = Endless.petX;
+            selectedY = Endless.petY;
         } else if (selectedElement.equals("Potions")) {
             isColorable = true;
             selectedX = Endless.potX;
@@ -149,6 +153,9 @@ public class ModMenu extends GuiScreen {
         } else if (selectedElement.equals("Item Flow")) {
             Endless.flowX = selectedX;
             Endless.flowY = selectedY;
+        } else if (selectedElement.equals("Active Pet")) {
+            Endless.petX = selectedX;
+            Endless.petY = selectedY;
         } else if (selectedElement.equals("Potions")) {
             Endless.potX = selectedX;
             Endless.potY = selectedY;
@@ -198,6 +205,10 @@ public class ModMenu extends GuiScreen {
         } else if (selectedElement.equals("Armor")) {
             rectX = 272;
             rectY = 65;
+            drawRect(0, 0, rectX, rectY, 0x40A0A0A0);
+        } else if (selectedElement.equals("Active Pet")) {
+            rectX = 280;
+            rectY = 75;
             drawRect(0, 0, rectX, rectY, 0x40A0A0A0);
         } else if (selectedElement.equals("Potions")) {
             rectX = 208;
