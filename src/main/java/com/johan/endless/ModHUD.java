@@ -263,8 +263,7 @@ public class ModHUD {
         return 0.0;
     }
 
-    public static void displayActivePet(RenderItem r)
-    {
+    public static void retrievePet() {
         GlStateManager.enableDepth();
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.75f, 0.75f, 1.0f);
@@ -284,11 +283,11 @@ public class ModHUD {
         if (!"Pets".equals(Endless.currentChestTitle)) return;
         int[][] slotRanges = {{10, 16}, {19, 25}, {28, 34}, {37, 43}};
         for (int[] range : slotRanges) {
-            findAndRenderPet(r, range[0], range[1]);
+            findAndUpdatePet(range[0], range[1]);
         }
     }
 
-    private static void findAndRenderPet(RenderItem r, int startSlot, int endSlot) {
+    private static void findAndUpdatePet(int startSlot, int endSlot) {
         if (Endless.currentChestInventory == null) return;
 
         for (int i = startSlot; i < endSlot; i++) {
@@ -298,18 +297,7 @@ public class ModHUD {
             List<String> tooltip = stack.getTooltip(Endless.MC.thePlayer, Endless.MC.gameSettings.advancedItemTooltips);
             for (String line : tooltip) {
                 if (line.contains("Click to despawn!")) {
-                    try {
-                        int armStartX = Endless.petX;
-                        int armStartY = Endless.petY;
-                        RenderHelper.enableGUIStandardItemLighting();
-                        GlStateManager.enableDepth();
-                        GlStateManager.pushMatrix();
-                        GlStateManager.scale(0.75f, 0.75f, 1.0f);
-                        r.renderItemIntoGUI(stack, armStartX + 2, (((armStartY + 10) * 2) + (i - 6) * 20 + 2)-100);
-                        GlStateManager.popMatrix();
-                        GlStateManager.disableDepth();
-                        RenderHelper.disableStandardItemLighting();
-                    } catch (Exception ignored) {}
+                    Endless.pet = stack;
                     return;
                 }
             }

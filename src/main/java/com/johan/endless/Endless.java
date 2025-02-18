@@ -16,6 +16,8 @@ package com.johan.endless;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiChest;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.inventory.ContainerChest;
@@ -75,6 +77,7 @@ public class Endless {
 
     public static final Map<String, Integer> activeKillers = new HashMap<String, Integer>();
     public static IInventory currentChestInventory;
+    public static ItemStack pet;
     public static String currentChestTitle;
     public static String autogg = "gg";
 
@@ -287,10 +290,21 @@ public class Endless {
             if (showStrength){ ModHUD.displayStrength(fontRenderer); }
             if (showInventory){ ModHUD.displayInventory(renderItem); }
             if (showArmor){ ModHUD.displayArmor(renderItem); }
-            if (showActivePet){ ModHUD.displayActivePet(renderItem); }
+            if (showActivePet){ ModHUD.retrievePet(); }
             if (showItemFlow){
                 ItemFlow.updateInventory();
                 ItemFlow.renderItemChanges(fontRenderer);
+            }
+
+            if(showActivePet && pet != null){
+                RenderHelper.enableGUIStandardItemLighting();
+                GlStateManager.enableDepth();
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(0.75f, 0.75f, 1.0f);
+                renderItem.renderItemIntoGUI(pet, petX + 2, (petY + 10) * 2 - 18);
+                GlStateManager.popMatrix();
+                GlStateManager.disableDepth();
+                RenderHelper.disableStandardItemLighting();
             }
 
             ModHUD.displayPot(count, pot, renderItem, fontRenderer);
