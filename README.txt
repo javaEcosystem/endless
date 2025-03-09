@@ -1,8 +1,7 @@
 Endless - A mod designed to enhance your 1.8.9 multiplayer experience :)
 
 
-📜 Features
-
+✨ Features
 - Keybinds from F7 to F10 allow you to execute a customizable command using, for F7, { /setf7 (command) } (for example : /setf7 /hub)
 - FPS Display
 - Inventory Display
